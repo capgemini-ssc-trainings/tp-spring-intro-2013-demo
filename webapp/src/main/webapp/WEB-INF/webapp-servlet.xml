@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.1.xsd
+		http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-3.1.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.1.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd">
+
+	<import resource="classpath:/app/server/bean-definitions.xml"/>
+	
+	<!-- //[ Aufgabe 7.2  Enable scanning for BookController -->
+	<!-- Scans for application @Controllers -->
+	<context:component-scan base-package="app.web" />
+	<!-- //] Aufgabe 7.2 -->
+	
+	<!-- //[ Aufgabe 7.3  Enable scanning for @RequestMappings and @RequestParams -->
+	<!-- Scans for @RequestMappings and @RequestParams; enables the JSR-303 support, including the @Valid annotation -->
+	<mvc:annotation-driven />
+	<!-- //] Aufgabe 7.3 -->
+	
+	<mvc:resources mapping="/resources/**" location="/resources/" />
+
+	<!-- //[ Aufgabe 7.4  Configure JSP view resolver -->
+	<!-- Configures JSP view resolver -->
+	<bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="prefix" value="/WEB-INF/jsp/" />
+		<property name="suffix" value=".jsp" />
+	</bean>
+	<!-- //] Aufgabe 7.4 -->
+	
+</beans>

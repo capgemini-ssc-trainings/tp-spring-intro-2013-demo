@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd">
+		
+	
+	<beans profile="default">
+		<!-- //[ Aufgabe 8.2  Define a 'default' profile with a http proxy accessing the BookService remotely on the local Tomcat instance -->
+		<bean id="bookService" class="org.springframework.remoting.httpinvoker.HttpInvokerProxyFactoryBean">
+			<property name="serviceUrl" value="http://localhost:8080/remoting/service/BookService" />
+			<property name="serviceInterface" value="app.shared.service.IBookService" />
+		</bean>
+		<!-- //] Aufgabe 8.2 -->
+	</beans>
+	
+	
+	<!-- //[ Aufgabe 8.2 Define a 'microCloudFoundry' profile with a http proxy accessing the BookService remotely on the Micro Cloud Foundry -->
+	<beans profile="microCloudFoundry">
+		<bean id="bookService" class="org.springframework.remoting.httpinvoker.HttpInvokerProxyFactoryBean">
+			<property name="serviceUrl" value="http://tp-spring-intro-remoting.training.cloudfoundry.me/service/BookService" />
+			<property name="serviceInterface" value="app.shared.service.IBookService" />
+		</bean>
+	</beans>
+	<!-- //] Aufgabe 8.2 -->
+	
+	<!-- //[ Aufgabe 8.2 Define a 'cloudFoundry' profile with a http proxy accessing the BookService remotely on the Cloud Foundry -->
+	<beans profile="cloudFoundry">
+		<bean id="bookService" class="org.springframework.remoting.httpinvoker.HttpInvokerProxyFactoryBean">
+			<property name="serviceUrl" value="http://tp-spring-intro-remoting.cloudfoundry.com/service/BookService" />
+			<property name="serviceInterface" value="app.shared.service.IBookService" />
+		</bean>
+	</beans>
+	<!-- //] Aufgabe 8.2 -->
+
+</beans>

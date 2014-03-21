@@ -1,0 +1,233 @@
+<?xml version="1.0"?>
+<!--
+  * build.xml - Build-Skript zum Erstellen von Uebungen aus Musterlösungen
+  *
+  * Projekt sd&m Component-School
+  *
+  * Copyright (C) 2007 software design & management (sd&m AG)
+  *
+  * $Id: school_build.xml 3256 2008-05-22 13:44:15Z lehmann $
+  -->
+
+<project name="tp-spring-intro.remoting" default="zip" basedir=".">
+
+	<!--  ######################################################################################### -->
+
+	<property name="src.dir" location="src"/>
+	<property name="target.dir" location="target"/>
+	<property name="exercise.dir" location="${target.dir}/exercise"/>
+	<property name="exc.nr" value=""/>
+
+	<!--  ######################################################################################### -->
+
+	<!--  list of all java files which should be treated by "remove-solution-code-java" -->
+	<patternset id="java.filter.files">
+	    <include name="**/*.java"/>
+	</patternset>
+
+	<!--  list of all xml files which should be treated by "remove-solution-code-xml" -->
+	<patternset id="xml.filter.files">
+	    <include name="**/*.xml"/>
+	</patternset>
+
+	<!--  ######################################################################################### -->
+
+	<target name="zip" depends="exercise-src">
+		<basename property="prefix" file="${basedir}"/>
+		<zip zipfile="${target.dir}/${ant.project.name}-Aufgaben${exc.nr}.zip">
+			<zipfileset dir="${basedir}" prefix="${prefix}">
+				<include name="**/*.*"/>
+				<exclude name="target/**/*.*"/>
+				<exclude name="**/.svn/*.*"/>
+		    <exclude name="src/**/*.java"/>
+				<exclude name="src/**/*.xml"/>
+				<exclude name="**/school_build.xml"/>
+			</zipfileset>
+			<zipfileset dir="${exercise.dir}" prefix="${prefix}">
+				<include name="**/*.*"/>
+				<include name="**/*"/>
+				<include name="**"/>
+				<include name="*"/>
+				<exclude name="target/**/*.*"/>
+				<exclude name="**/.svn/*.*"/>
+				<exclude name="**/school_build.xml"/>
+			</zipfileset>
+		</zip>
+		<zip zipfile="${target.dir}/${ant.project.name}-Loesung.zip">
+			<zipfileset dir="${basedir}" prefix="${prefix}">
+				<include name="**/*.*"/>
+				<exclude name="target/**/*.*"/>
+				<exclude name="**/.svn/*.*"/>
+				<exclude name="**/school_build.xml"/>
+			</zipfileset>
+		</zip>
+	</target>
+
+	<!--  ######################################################################################### -->
+
+	<target name="exercise-src">
+		<delete dir="${exercise.dir}"/>
+		<mkdir dir="${exercise.dir}"/>
+		<antcall target="remove-solution-code-java">
+			<param name="in.dir" value="${src.dir}"/>
+			<param name="out.dir" value="${exercise.dir}/src"/>
+		</antcall>
+
+		<antcall target="remove-solution-code-xml">
+			<param name="in.dir" value="${src.dir}"/>
+			<param name="out.dir" value="${exercise.dir}/src"/>
+		</antcall>
+	</target>
+
+	<!--  ######################################################################################### -->
+
+	<!--
+	  * Aufrufziel zum Löschen der Musterlösungen aus Java Programmieraufgaben.
+	  *
+	  * Ausblenden von Blöcken:
+	  *
+	  *    //[ Aufgabe [${name.regex}]
+	  *    ...
+	  *    //] Aufgabe [${name.regex}] [- <Ersatz>]
+	  *
+	  * Einzelne Zeilen:
+      *
+	  *    //- Aufgabe [${name.regex}]
+	  *
+	  * Trägt die Aufgabe einen mit 'name.regex' übereinstimmenden Namen,
+	  * so bleibt ein Kommentar der Form '// Aufgabe <Name>' im Ergebnis
+	  * erhalten.
+	  *
+	  * Parameter:
+	  *
+	  * in.dir - Eingabeverzeichnis
+	  * out.dir - Ausgabeverzeichnis
+	  * name.regex - Ausdruck zur Auswahl der Namen (optional, ansonsten alle)
+	  -->
+	<target name="remove-solution-code-java">
+		<condition property="name.regex" value="[^-]*">
+ 			<not>
+				<isset property="name.regex"/>
+ 			</not>
+		</condition>
+		<copy todir="${out.dir}">
+			<fileset dir="${in.dir}">
+			  <patternset refid="java.filter.files"/>
+			</fileset>
+			<filterchain>
+				<tokenfilter>
+					<linetokenizer/>
+					<replaceregex
+						pattern="/\*"
+						replace="#*"
+						flags="g"
+					/>
+					<replaceregex
+						pattern=".*//- Aufgabe\s*$$"
+						replace=""
+					/>
+					<!--
+					<replaceregex
+						pattern="(\s*).*//- Aufgabe\s+(${name.regex})$$"
+						replace="\1## Aufgabe \2&#10;"
+					/>
+					-->
+					<replaceregex
+						pattern="//\[ Aufgabe\s+(${name.regex})"
+						replace="/\*"
+					/>
+					<replaceregex
+						pattern="(\s*)//\] Aufgabe\s*$$"
+						replace="\*/"
+					/>
+					<replaceregex
+						pattern="(\s*)//\] Aufgabe\s+(${name.regex})(\s*(.*)) -(\s*(.*))?"
+						replace="\*/&#10;\1## TODO \2 \4&#10;\1\5"
+					/>					
+					<replaceregex
+						pattern="(\s*)//\] Aufgabe\s+(${name.regex}) -(\s*(.*))?"
+						replace="\*/&#10;\1## TODO \2&#10;&#10;\1\4"
+					/>
+					<replaceregex
+						pattern="(\s*)//\] Aufgabe\s+(${name.regex})(\s*(.*))?"
+						replace="\*/&#10;\1## TODO \2 \4"
+					/>					
+					<replaceregex
+						pattern="//"
+						replace="##"
+					/>
+				</tokenfilter>
+				<stripjavacomments/>
+				<tokenfilter>
+					<linetokenizer/>
+					<replaceregex
+						pattern="#\*"
+						replace="/*"
+						flags="g"
+					/>
+					<replaceregex
+						pattern="##"
+						replace="//"
+					/>
+				</tokenfilter>
+			</filterchain>
+		</copy>
+	</target>
+
+	<!--  ######################################################################################### -->
+
+	<target name="remove-solution-code-xml">
+		<condition property="name.regex" value="[^-]*">
+ 			<not>
+				<isset property="name.regex"/>
+ 			</not>
+		</condition>
+		<copy todir="${out.dir}">
+			<fileset dir="${in.dir}">
+				<patternset refid="xml.filter.files"/>
+			</fileset>
+			<filterchain>
+				<tokenfilter>
+					<replaceregex
+						pattern="/\*"
+						replace="#*"
+						flags="g"
+					/>
+					<replaceregex
+						pattern="(\s*)(&lt;!\-\- //\[ Aufgabe )(${name.regex}) -(\s*(.*)) \-\-&gt;"
+						replace="\1&lt;!\-\- TODO \3 \-\-&gt;&#10;\1\4 /\*"
+					/>					
+					<replaceregex
+						pattern="(&lt;!\-\- //\[ Aufgabe )(${name.regex}) (\s*(.*)) \-\-&gt;"
+						replace="&lt;!\-\- TODO \2 \4 \-\-&gt; /\*"
+					/>
+					<replaceregex
+						pattern="(&lt;!\-\- //\[ Aufgabe )(${name.regex}) \-\-&gt;"
+						replace="&lt;!\-\- TODO \2 \-\-&gt; /\*"
+					/>
+					<replaceregex
+						pattern="(\s*)&lt;!\-\- //\] Aufgabe (${name.regex}) \-\-&gt;"
+						replace="\*/"
+					/>
+					<replaceregex
+						pattern="//"
+						replace="##"
+					/>
+				</tokenfilter>
+				<stripjavacomments/>
+				<tokenfilter>
+					<linetokenizer/>
+					<replaceregex
+						pattern="#\*"
+						replace="/*"
+						flags="g"
+					/>
+					<replaceregex
+						pattern="##"
+						replace="//"
+					/>
+				</tokenfilter>
+			</filterchain>
+		</copy>
+	</target>
+</project>
